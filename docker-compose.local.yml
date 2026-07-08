@@ -1,0 +1,93 @@
+name: ruoyi-cloud-learning
+
+services:
+  rcl-mysql:
+    image: mysql:8.0.39
+    container_name: rcl-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${LOCAL_MYSQL_ROOT_PASSWORD:-root1234;}"
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --default-time-zone=+08:00
+      - --lower-case-table-names=1
+      - --max_allowed_packet=256M
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    networks:
+      - ruoyi-cloud-learning-local
+
+  rcl-redis:
+    image: redis:7
+    container_name: rcl-redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: "${LOCAL_REDIS_PASSWORD:-rEdis211!}"
+      TZ: Asia/Shanghai
+    command: ["sh", "-c", "redis-server --appendonly yes --requirepass \"$${REDIS_PASSWORD}\""]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - ruoyi-cloud-learning-local
+
+  nacos:
+    image: nacos/nacos-server:v3.1.2
+    container_name: rcl-nacos
+    restart: unless-stopped
+    depends_on:
+      rcl-mysql:
+        condition: service_healthy
+    environment:
+      MODE: standalone
+      PREFER_HOST_MODE: hostname
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: rcl-mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: ry-config
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: "${LOCAL_MYSQL_ROOT_PASSWORD:-root1234;}"
+      MYSQL_SERVICE_DB_PARAM: "characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai"
+      NACOS_AUTH_ENABLE: "false"
+      NACOS_AUTH_TOKEN: "${LOCAL_NACOS_AUTH_TOKEN:-TmFjb3NMb2NhbERldlNlY3JldEtleTEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=}"
+      NACOS_AUTH_IDENTITY_KEY: "${LOCAL_NACOS_AUTH_IDENTITY_KEY:-nacos-local-dev-key}"
+      NACOS_AUTH_IDENTITY_VALUE: "${LOCAL_NACOS_AUTH_IDENTITY_VALUE:-nacos-local-dev-value}"
+      TZ: Asia/Shanghai
+      JAVA_OPT_EXT: "-Xms256m -Xmx512m -Xmn128m"
+    ports:
+      - "18080:8080"
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    volumes:
+      - nacos-logs:/home/nacos/logs
+    networks:
+      - ruoyi-cloud-learning-local
+
+networks:
+  ruoyi-cloud-learning-local:
+    name: ruoyi-cloud-learning-local
+    ipam:
+      config:
+        - subnet: 172.30.241.0/24
+
+volumes:
+  mysql-data:
+  redis-data:
+  nacos-logs:
