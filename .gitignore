@@ -1,70 +1,38 @@
+# macOS
 .DS_Store
-node_modules/
-dist/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-**/*.log
 
-tests/**/coverage/
-tests/e2e/reports
-selenium-debug.log
-
-# Editor directories and files
-.idea
-.vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.local
-
-package-lock.json
-yarn.lock
-
-######################################################################
-# Build Tools
-
-.gradle
-/build/
-!gradle/wrapper/gradle-wrapper.jar
-
-target/
-!.mvn/wrapper/maven-wrapper.jar
-
-######################################################################
 # IDE
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+.idea/
+.vscode/
 *.iml
 *.ipr
+*.iws
 
-### JRebel ###
-rebel.xml
-### NetBeans ###
-nbproject/private/
-build/*
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
-
-######################################################################
-# Others
+# Java / Maven
+target/
+**/target/
 *.log
-*.xml.versionsBackup
-*.swp
+logs/
+**/logs/
 
-!*/build/*.java
-!*/build/*.html
-!*/build/*.xml
+# Node / Vue
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Env
+.env.local
+.env.*.local
+
+# Build / temp
+build/
+**/build/
+tmp/
+temp/
+
+# Git nested repos copied from other projects
+**/.git/
