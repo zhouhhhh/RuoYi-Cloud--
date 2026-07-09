@@ -213,26 +213,24 @@ Vue3 -> Gateway -> Customer/Contract -> OpenFeign -> System/其他服务
 
 ## 当前任务
 
-当前里程碑：`01 环境基线`。
+当前里程碑：`02 请求链路`。
 
-开始时只完成以下最小闭环：
+开始时只完成验证码请求链路这一小闭环：
 
-1. 核对 JDK、Maven、Node、npm 和 Docker 版本。
-2. 启动 MySQL、Redis，确认健康检查通过。
-3. 初始化 `ry-cloud`、`ry-config`，再启动 Nacos。
-4. 核对 Nacos 中 MySQL、Redis 密码与 `docker-compose.local.yml` 一致。
-5. 启动 Gateway、Auth、System、Gen。
-6. 启动 Vue3 前端并完成一次登录。
-7. 保存服务列表、Network 请求和关键日志作为验收证据。
+1. 在浏览器 Network 中重新请求 `/dev-api/code`。
+2. 从 `src/views/login.vue` 定位到 `src/api/login.js` 的 `getCodeImg()`。
+3. 说明 `/dev-api` 如何经过 Vite 代理到 Gateway。
+4. 定位 Gateway 中 `/code` 的路由函数、Handler 和 Service。
+5. 在 Redis 中观察 `captcha_codes:*` 的 Key 与 TTL。
+6. 使用源码、Network、Redis 和必要日志画出验证码请求链路。
 
-注意：仓库内 Nacos 初始 SQL 中的数据库和 Redis 凭据可能与本地 Compose
-默认值不同。必须以实际配置和连接结果为准，修改 Nacos 配置后重启依赖服务。
+本轮只跟踪验证码生成，不同时展开登录、Token、用户信息和动态路由。
 
 ## 开发清单
 
 ### 里程碑 01 环境基线
 
-- **状态：** [ ]
+- **状态：** [x]
 - **开发内容：** 启动 MySQL、Redis、Nacos、Gateway、Auth、System、Gen 和 Vue3 前端；初始化数据库并统一本地配置。
 - **必须理解：** 容器健康检查、服务启动顺序、Nacos 注册中心与配置中心、Bootstrap 配置加载。
 - **完成标准：** 前端可登录；核心服务出现在 Nacos；后端无数据库、Redis 或配置加载错误。

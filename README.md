@@ -6,9 +6,11 @@
 
 ## 当前进度
 
-- 当前里程碑：`01 环境基线`
-- 当前目标：启动完整开发环境，打通登录链路并保存验证证据
+- 已完成：`01 环境基线`
+- 当前里程碑：`02 请求链路`
+- 当前目标：从验证码请求开始，跟踪 Vue3、Vite、Gateway 和 Redis 的完整调用链
 - 完整任务和验收标准：[AGENTS.md](AGENTS.md)
+- 最近学习记录：[里程碑 01：环境基线](docs/progress/2026-07-09-milestone-01.md)
 
 ## 项目目标
 
@@ -124,6 +126,7 @@ npm run dev
 - [完整学习清单与项目约束](AGENTS.md)
 - [AI 教学模式](docs/ai-tutor-mode.md)
 - [AI 代码审查模式](docs/ai-review-mode.md)
+- [里程碑 01 学习记录](docs/progress/2026-07-09-milestone-01.md)
 - [学习路线设计](docs/superpowers/specs/2026-07-09-ruoyi-cloud-learning-roadmap-design.md)
 
 ## 注意事项
