@@ -14,7 +14,7 @@ cp ../sql/ry_config_20260311.sql ./mysql/db
 
 # copy html
 echo "begin copy html "
-cp -r ../ruoyi-ui/dist/** ./nginx/html/dist
+cp -r ../../RuoYi-Cloud-Vue3-master/dist/** ./nginx/html/dist
 
 
 # copy jar
@@ -38,4 +38,3 @@ cp ../ruoyi-modules/ruoyi-job/target/ruoyi-modules-job.jar ./ruoyi/modules/job/j
 
 echo "begin copy ruoyi-modules-gen "
 cp ../ruoyi-modules/ruoyi-gen/target/ruoyi-modules-gen.jar ./ruoyi/modules/gen/jar
-
