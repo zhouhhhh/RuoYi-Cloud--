@@ -8,9 +8,8 @@
 
 - 已完成：`01 环境基线`
 - 当前里程碑：`02 请求链路`
-- 当前目标：从验证码请求开始，跟踪 Vue3、Vite、Gateway 和 Redis 的完整调用链
+- 当前目标：从验证码请求开始，跟踪本机 Vue3、Vite、Gateway 与远程 Redis 的完整调用链
 - 完整任务和验收标准：[AGENTS.md](AGENTS.md)
-- 最近学习记录：[里程碑 01：环境基线](docs/progress/2026-07-09-milestone-01.md)
 
 ## 项目目标
 
@@ -45,8 +44,8 @@
 
 - `RuoYi-Cloud-springboot3`：Spring Boot 3 后端主工程。
 - `RuoYi-Cloud-Vue3-master`：唯一使用的 Vue3 管理后台前端。
-- `docker-compose.local.yml`：本地 MySQL、Redis 和 Nacos。
-- `docs`：AI 教学、审查和实施文档。
+- `docker-compose.local.yml`：远程 Docker 主机使用的 MySQL、Redis 和 Nacos 配置。
+- `docs`：AI 教学和代码审查规则。
 
 ## 快速开始
 
@@ -57,9 +56,10 @@
 - Node.js 与 npm
 - Docker 与 Docker Compose
 
-### 2. 启动基础设施
+### 2. 启动远程基础设施
 
-在项目根目录先启动 MySQL 和 Redis：
+当前 MySQL、Redis 和 Nacos 运行在局域网主机
+`192.168.106.199`。在远程部署目录先启动 MySQL 和 Redis：
 
 ```bash
 docker compose -f docker-compose.local.yml up -d rcl-mysql rcl-redis
@@ -72,13 +72,24 @@ docker compose -f docker-compose.local.yml up -d rcl-mysql rcl-redis
 2. 执行
    `ruoyi-cloud-learning/RuoYi-Cloud-springboot3/sql/ry_config_20260611.sql`，
    创建并初始化 `ry-config`。
-3. 核对 Nacos 配置中的 MySQL、Redis 凭据与本地 Compose 配置一致。
+3. 核对 Nacos 配置中的 MySQL、Redis 凭据与远程 Compose 配置一致。
 
 然后启动 Nacos：
 
 ```bash
 docker compose -f docker-compose.local.yml up -d nacos
 docker compose -f docker-compose.local.yml ps
+```
+
+从本机确认远程端口可达：
+
+```bash
+nc -vz 192.168.106.199 3306
+nc -vz 192.168.106.199 6379
+nc -vz 192.168.106.199 8848
+nc -vz 192.168.106.199 9848
+nc -vz 192.168.106.199 9849
+nc -vz 192.168.106.199 18080
 ```
 
 ### 3. 构建和启动后端
@@ -105,9 +116,11 @@ npm run dev
 
 | 服务 | 地址 |
 | --- | --- |
-| Vue3 前端 | <http://localhost> |
+| Vue3 前端 | <http://localhost:3000> |
 | Gateway | <http://localhost:8080> |
-| Nacos 控制台 | <http://localhost:18080/nacos> |
+| Nacos 控制台 | <http://192.168.106.199:18080/nacos> |
+| MySQL | `192.168.106.199:3306` |
+| Redis | `192.168.106.199:6379` |
 
 ## 学习路线
 
@@ -126,13 +139,13 @@ npm run dev
 - [完整学习清单与项目约束](AGENTS.md)
 - [AI 教学模式](docs/ai-tutor-mode.md)
 - [AI 代码审查模式](docs/ai-review-mode.md)
-- [里程碑 01 学习记录](docs/progress/2026-07-09-milestone-01.md)
-- [学习路线设计](docs/superpowers/specs/2026-07-09-ruoyi-cloud-learning-roadmap-design.md)
 
 ## 注意事项
 
-- 首次启动必须先初始化数据库，再启动依赖 `ry-config` 的 Nacos。
+- 首次启动必须在远程主机初始化数据库，再启动依赖 `ry-config` 的 Nacos。
 - 修改 Nacos 配置后，需要重启依赖该配置的服务。
-- 停止 Compose 时不要默认增加 `-v`，避免删除学习数据库卷。
+- `ruoyi-job`、`ruoyi-file`、`ruoyi-monitor` 仍保留本机 Nacos 地址，启用前要改为远程地址。
+- 远程基础设施端口只向可信局域网开放，不对公网暴露。
+- 停止远程 Compose 时不要默认增加 `-v`，避免删除学习数据库卷。
 - 遇到问题时按前端、Gateway、Auth、业务服务、Nacos、Redis、MySQL 和
   Docker 的顺序收集证据；完整排错规则见 `AGENTS.md`。

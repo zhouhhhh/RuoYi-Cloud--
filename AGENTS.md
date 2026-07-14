@@ -61,10 +61,10 @@ AGENTS.md
   项目事实、开发约束、学习路线和当前进度。
 
 docker-compose.local.yml
-  本地 MySQL、Redis、Nacos 基础设施。
+  部署到远程 Docker 主机的 MySQL、Redis、Nacos 基础设施配置。
 
 docs/
-  AI 协作规则、学习路线设计和实施计划。
+  AI 教学模式和代码审查模式。
 
 ruoyi-cloud-learning/RuoYi-Cloud-springboot3/
   Spring Boot 3 后端主工程。
@@ -94,11 +94,35 @@ ruoyi-cloud-learning/RuoYi-Cloud-Vue3-master/
   唯一使用的 Vue3 管理后台前端。
 ```
 
+## 当前运行拓扑
+
+```text
+本机
+├── Vue3 前端       3000
+├── ruoyi-gateway    8080
+├── ruoyi-auth       9200
+├── ruoyi-system     9201
+└── ruoyi-gen        9202
+        │
+        │ 局域网
+        ▼
+远程 Docker 主机 192.168.106.199
+├── MySQL             3306
+├── Redis             6379
+├── Nacos             8848
+└── Nacos 控制台     18080
+```
+
+当前 `ruoyi-gateway`、`ruoyi-auth`、`ruoyi-system`、`ruoyi-gen`
+已指向 `192.168.106.199:8848`。`ruoyi-job`、`ruoyi-file` 和
+`ruoyi-monitor` 仍指向 `127.0.0.1:8848`，启用这些服务前必须先完成
+Nacos 地址迁移。
+
 ## 常用命令
 
-### 本地基础设施
+### 远程基础设施
 
-在项目根目录执行：
+在远程 Docker 主机的部署目录执行：
 
 ```bash
 docker compose -f docker-compose.local.yml up -d
@@ -108,6 +132,17 @@ docker compose -f docker-compose.local.yml down
 ```
 
 停止服务时默认不要增加 `-v`，避免误删学习数据库卷。
+
+从本机检查远程基础设施端口：
+
+```bash
+nc -vz 192.168.106.199 3306
+nc -vz 192.168.106.199 6379
+nc -vz 192.168.106.199 8848
+nc -vz 192.168.106.199 9848
+nc -vz 192.168.106.199 9849
+nc -vz 192.168.106.199 18080
+```
 
 ### 后端
 
@@ -142,17 +177,18 @@ npm run dev
 npm run build:prod
 ```
 
-当前 Vite 开发端口为 `80`，`/dev-api` 代理到 `http://localhost:8080`。
+当前 Vite 开发端口为 `3000`，`/dev-api` 代理到
+`http://localhost:8080`。
 
-### 本地访问点
+### 当前访问点
 
 ```text
-Vue3 前端       http://localhost
+Vue3 前端       http://localhost:3000
 Gateway         http://localhost:8080
-Nacos 控制台    http://localhost:18080/nacos
-Nacos 服务端口  127.0.0.1:8848
-MySQL           127.0.0.1:3306
-Redis           127.0.0.1:6379
+Nacos 控制台    http://192.168.106.199:18080/nacos
+Nacos 服务端口  192.168.106.199:8848
+MySQL           192.168.106.199:3306
+Redis           192.168.106.199:6379
 ```
 
 ## 请求链路
@@ -160,9 +196,12 @@ Redis           127.0.0.1:6379
 基础阶段：
 
 ```text
-Vue3 -> Vite 代理 -> Gateway -> Auth/System -> MyBatis -> MySQL
-                                      |
-                                      -> Redis
+Vue3:3000 -> Vite 代理 -> Gateway:8080 -> Auth/System -> MyBatis
+                                                |              |
+                                                |              -> 远程 MySQL
+                                                -> 远程 Redis
+
+本机 Java 服务 -> 远程 Nacos（注册发现与配置中心）
 ```
 
 微服务拆分后：
@@ -183,6 +222,7 @@ Vue3 -> Gateway -> Customer/Contract -> OpenFeign -> System/其他服务
 - 新接口必须考虑参数校验、权限、异常响应和必要的测试。
 - 服务拆分后，每个业务服务拥有自己的数据表，不跨库直连。
 - 不得把密码、令牌或本机绝对路径提交到业务配置。
+- 远程 MySQL、Redis、Nacos 端口只允许可信局域网或本机 IP 访问，不对公网暴露。
 - 涉及删除数据、删除卷、权限放开或安全白名单时，必须先说明风险。
 - 对不确定的事实先通过源码、配置或运行结果验证，不得假装确定。
 
@@ -221,7 +261,8 @@ Vue3 -> Gateway -> Customer/Contract -> OpenFeign -> System/其他服务
 2. 从 `src/views/login.vue` 定位到 `src/api/login.js` 的 `getCodeImg()`。
 3. 说明 `/dev-api` 如何经过 Vite 代理到 Gateway。
 4. 定位 Gateway 中 `/code` 的路由函数、Handler 和 Service。
-5. 在 Redis 中观察 `captcha_codes:*` 的 Key 与 TTL。
+5. 在远程 Redis（`192.168.106.199:6379`）中观察
+   `captcha_codes:*` 的 Key 与 TTL。
 6. 使用源码、Network、Redis 和必要日志画出验证码请求链路。
 
 本轮只跟踪验证码生成，不同时展开登录、Token、用户信息和动态路由。
@@ -231,10 +272,10 @@ Vue3 -> Gateway -> Customer/Contract -> OpenFeign -> System/其他服务
 ### 里程碑 01 环境基线
 
 - **状态：** [x]
-- **开发内容：** 启动 MySQL、Redis、Nacos、Gateway、Auth、System、Gen 和 Vue3 前端；初始化数据库并统一本地配置。
+- **开发内容：** 在远程 Docker 主机启动 MySQL、Redis、Nacos，在本机启动 Gateway、Auth、System、Gen 和 Vue3 前端；初始化数据库并统一远程连接配置。
 - **必须理解：** 容器健康检查、服务启动顺序、Nacos 注册中心与配置中心、Bootstrap 配置加载。
 - **完成标准：** 前端可登录；核心服务出现在 Nacos；后端无数据库、Redis 或配置加载错误。
-- **验证证据：** `docker compose ps`、Nacos 服务列表、登录 Network 请求、Gateway 与 Auth/System 日志。
+- **验证证据：** 远程 `docker compose ps`、Nacos 服务列表、本机到远程端口的连通结果、登录 Network 请求、Gateway 与 Auth/System 日志。
 
 ### 里程碑 02 请求链路
 
