@@ -64,7 +64,10 @@ docker-compose.local.yml
   部署到远程 Docker 主机的 MySQL、Redis、Nacos 基础设施配置。
 
 docs/
-  AI 教学模式和代码审查模式。
+  AI 协作规则和各里程碑的学习进度记录。
+
+docs/progress/
+  里程碑完成情况、运行证据、关键结论和后续任务。
 
 ruoyi-cloud-learning/RuoYi-Cloud-springboot3/
   Spring Boot 3 后端主工程。
@@ -253,19 +256,22 @@ Vue3 -> Gateway -> Customer/Contract -> OpenFeign -> System/其他服务
 
 ## 当前任务
 
-当前里程碑：`02 请求链路`。
+当前里程碑：`03 客户档案`。
 
-开始时只完成验证码请求链路这一小闭环：
+里程碑 02 已完成验证码、登录、用户信息、动态路由、用户列表、分页和
+无 Token 请求的完整链路验证，详细证据见
+`docs/progress/milestone-02.md`。
 
-1. 在浏览器 Network 中重新请求 `/dev-api/code`。
-2. 从 `src/views/login.vue` 定位到 `src/api/login.js` 的 `getCodeImg()`。
-3. 说明 `/dev-api` 如何经过 Vite 代理到 Gateway。
-4. 定位 Gateway 中 `/code` 的路由函数、Handler 和 Service。
-5. 在远程 Redis（`192.168.106.199:6379`）中观察
-   `captcha_codes:*` 的 Key 与 TTL。
-6. 使用源码、Network、Redis 和必要日志画出验证码请求链路。
+当前只完成 `crm_customer` 表结构设计这一小闭环：
 
-本轮只跟踪验证码生成，不同时展开登录、Token、用户信息和动态路由。
+1. 明确客户档案的最小业务范围和列表、表单、详情所需字段。
+2. 参考现有 RuoYi 表结构，确定主键、业务字段、状态、负责人、审计字段
+   和逻辑删除字段。
+3. 为每个字段说明类型、长度、是否为空、默认值和业务含义。
+4. 设计必要的普通索引和唯一约束，并说明查询场景。
+5. 形成建表 SQL 草稿，先审查再执行。
+
+本轮不使用代码生成器，不生成 Controller、Service、Mapper 或前端页面。
 
 ## 开发清单
 
@@ -279,7 +285,7 @@ Vue3 -> Gateway -> Customer/Contract -> OpenFeign -> System/其他服务
 
 ### 里程碑 02 请求链路
 
-- **状态：** [ ]
+- **状态：** [x]
 - **开发内容：** 跟踪验证码、登录、获取用户信息、获取路由和系统列表查询的完整链路。
 - **必须理解：** Vite 代理、Gateway 路由与 `StripPrefix`、Token、Redis 会话、统一响应和分页。
 - **完成标准：** 能从前端请求定位到 Controller、Service、Mapper 和 SQL，并能解释 401、403、404、500 的所属层。

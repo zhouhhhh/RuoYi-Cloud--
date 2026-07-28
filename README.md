@@ -6,9 +6,10 @@
 
 ## 当前进度
 
-- 已完成：`01 环境基线`
-- 当前里程碑：`02 请求链路`
-- 当前目标：从验证码请求开始，跟踪本机 Vue3、Vite、Gateway 与远程 Redis 的完整调用链
+- 已完成：`01 环境基线`、`02 请求链路`
+- 当前里程碑：`03 客户档案`
+- 当前目标：设计 `crm_customer` 表结构、字段约束和索引
+- 已完成记录：[里程碑 02 请求链路](docs/progress/milestone-02.md)
 - 完整任务和验收标准：[AGENTS.md](AGENTS.md)
 
 ## 项目目标
@@ -36,7 +37,9 @@
 ├── docker-compose.local.yml
 ├── docs/
 │   ├── ai-tutor-mode.md
-│   └── ai-review-mode.md
+│   ├── ai-review-mode.md
+│   └── progress/
+│       └── milestone-02.md
 └── ruoyi-cloud-learning/
     ├── RuoYi-Cloud-springboot3/
     └── RuoYi-Cloud-Vue3-master/
@@ -45,7 +48,7 @@
 - `RuoYi-Cloud-springboot3`：Spring Boot 3 后端主工程。
 - `RuoYi-Cloud-Vue3-master`：唯一使用的 Vue3 管理后台前端。
 - `docker-compose.local.yml`：远程 Docker 主机使用的 MySQL、Redis 和 Nacos 配置。
-- `docs`：AI 教学和代码审查规则。
+- `docs`：AI 协作规则和里程碑学习进度。
 
 ## 快速开始
 
@@ -139,6 +142,7 @@ npm run dev
 - [完整学习清单与项目约束](AGENTS.md)
 - [AI 教学模式](docs/ai-tutor-mode.md)
 - [AI 代码审查模式](docs/ai-review-mode.md)
+- [里程碑 02 请求链路进度](docs/progress/milestone-02.md)
 
 ## 注意事项
 
