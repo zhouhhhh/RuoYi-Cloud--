@@ -1,0 +1,28 @@
+create table crm_customer
+(
+    customer_id bigint not null auto_increment comment '客户ID',
+    customer_no varchar(32) not null comment '客户编号',
+    customer_name varchar(100) not null comment '客户名称',
+    customer_type char(1) not null default '0' comment '客户类型 0 个人客户 1 企业客户',
+    phone varchar(20) not null comment '联系电话',
+    email varchar(100) comment '电子邮箱',
+    address varchar(255) comment '联系地址',
+    source char(1) not null default '3' comment '客户来源 0 主动开发1 客户推荐2 网络推广3 其他',
+    level char(1) not null default 'C' comment '客户等级 ABC',
+    status char(1) not null default '0' comment '客户状态 0 潜在 1 跟进中 2 已成交 3 已流失',
+    owner_id bigint not null comment '负责人ID',
+    dept_id bigint not null comment '部门ID',
+    last_follow_time datetime comment '最后跟进时间',
+    del_flag char(1) default '0' comment '删除标志 0 正常 2 删除',
+    create_by varchar(64) comment '创建者',
+    create_time datetime comment '创建时间',
+    update_by varchar(64) comment '更新者',
+    update_time datetime comment '更新时间',
+    remark varchar(500) comment '备注',
+    primary key (customer_id),
+    unique key uk_customer_no (customer_no),
+    unique key uk_customer_phone (phone),
+    key idx_customer_owner (owner_id),
+    key idx_customer_dept (dept_id),
+    key idx_customer_status (status)
+) engine=InnoDB default charset=utf8mb4 comment='客户信息表';
