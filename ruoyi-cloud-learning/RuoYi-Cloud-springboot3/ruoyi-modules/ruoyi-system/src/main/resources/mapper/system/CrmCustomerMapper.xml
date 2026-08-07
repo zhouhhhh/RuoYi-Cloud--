@@ -40,12 +40,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="status != null  and status != ''"> and status = #{status}</if>
             <if test="ownerId != null "> and owner_id = #{ownerId}</if>
             <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+            and del_flag = '0'
         </where>
     </select>
     
     <select id="selectCrmCustomerByCustomerId" parameterType="Long" resultMap="CrmCustomerResult">
         <include refid="selectCrmCustomerVo"/>
-        where customer_id = #{customerId}
+        where customer_id = #{customerId} and del_flag = '0'
     </select>
 
     <insert id="insertCrmCustomer" parameterType="CrmCustomer" useGeneratedKeys="true" keyProperty="customerId">
@@ -63,7 +64,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="ownerId != null">owner_id,</if>
             <if test="deptId != null">dept_id,</if>
             <if test="lastFollowTime != null">last_follow_time,</if>
-            <if test="delFlag != null">del_flag,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
@@ -83,7 +83,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="ownerId != null">#{ownerId},</if>
             <if test="deptId != null">#{deptId},</if>
             <if test="lastFollowTime != null">#{lastFollowTime},</if>
-            <if test="delFlag != null">#{delFlag},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
@@ -107,22 +106,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="ownerId != null">owner_id = #{ownerId},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="lastFollowTime != null">last_follow_time = #{lastFollowTime},</if>
-            <if test="delFlag != null">del_flag = #{delFlag},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="remark != null">remark = #{remark},</if>
         </trim>
-        where customer_id = #{customerId}
+        where customer_id = #{customerId} and del_flag = '0'
     </update>
 
     <delete id="deleteCrmCustomerByCustomerId" parameterType="Long">
-        delete from crm_customer where customer_id = #{customerId}
+        update crm_customer set del_flag = '2' where customer_id = #{customerId}
     </delete>
 
     <delete id="deleteCrmCustomerByCustomerIds" parameterType="String">
-        delete from crm_customer where customer_id in 
+        update crm_customer set del_flag = '2' where customer_id in
         <foreach item="customerId" collection="array" open="(" separator="," close=")">
             #{customerId}
         </foreach>
