@@ -63,11 +63,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="status != null and status != ''">status,</if>
             <if test="ownerId != null">owner_id,</if>
             <if test="deptId != null">dept_id,</if>
-            <if test="lastFollowTime != null">last_follow_time,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
-            <if test="updateBy != null">update_by,</if>
-            <if test="updateTime != null">update_time,</if>
             <if test="remark != null">remark,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -82,11 +79,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="status != null and status != ''">#{status},</if>
             <if test="ownerId != null">#{ownerId},</if>
             <if test="deptId != null">#{deptId},</if>
-            <if test="lastFollowTime != null">#{lastFollowTime},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
-            <if test="updateBy != null">#{updateBy},</if>
-            <if test="updateTime != null">#{updateTime},</if>
             <if test="remark != null">#{remark},</if>
          </trim>
     </insert>
@@ -94,7 +88,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="updateCrmCustomer" parameterType="CrmCustomer">
         update crm_customer
         <trim prefix="SET" suffixOverrides=",">
-            <if test="customerNo != null and customerNo != ''">customer_no = #{customerNo},</if>
             <if test="customerName != null and customerName != ''">customer_name = #{customerName},</if>
             <if test="customerType != null and customerType != ''">customer_type = #{customerType},</if>
             <if test="phone != null and phone != ''">phone = #{phone},</if>
@@ -105,9 +98,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="status != null and status != ''">status = #{status},</if>
             <if test="ownerId != null">owner_id = #{ownerId},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
-            <if test="lastFollowTime != null">last_follow_time = #{lastFollowTime},</if>
-            <if test="createBy != null">create_by = #{createBy},</if>
-            <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="remark != null">remark = #{remark},</if>
@@ -119,7 +109,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         update crm_customer set del_flag = '2' where customer_id = #{customerId}
     </delete>
 
-    <delete id="deleteCrmCustomerByCustomerIds" parameterType="String">
+    <delete id="deleteCrmCustomerByCustomerIds" parameterType="Long">
         update crm_customer set del_flag = '2' where customer_id in
         <foreach item="customerId" collection="array" open="(" separator="," close=")">
             #{customerId}

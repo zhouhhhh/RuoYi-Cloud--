@@ -113,21 +113,20 @@
 
     <el-table v-loading="loading" :data="customerList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="客户ID" align="center" prop="customerId" />
       <el-table-column label="客户编号" align="center" prop="customerNo" />
       <el-table-column label="客户名称" align="center" prop="customerName" />
-      <el-table-column label="客户类型 0 个人客户 1 企业客户" align="center" prop="customerType">
+      <el-table-column label="客户类型" align="center" prop="customerType">
         <template #default="scope">
           <dict-tag :options="crm_customer_type" :value="scope.row.customerType"/>
         </template>
       </el-table-column>
       <el-table-column label="联系电话" align="center" prop="phone" />
-      <el-table-column label="客户等级 ABC" align="center" prop="level">
+      <el-table-column label="客户等级" align="center" prop="level">
         <template #default="scope">
           <dict-tag :options="crm_customer_level" :value="scope.row.level"/>
         </template>
       </el-table-column>
-      <el-table-column label="客户状态 0 潜在 1 跟进中 2 已成交 3 已流失" align="center" prop="status">
+      <el-table-column label="客户状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :options="crm_customer_status" :value="scope.row.status"/>
         </template>
