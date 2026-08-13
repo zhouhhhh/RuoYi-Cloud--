@@ -167,7 +167,7 @@
         <el-row>
           <el-col :span="24">
             <el-form-item label="客户编号" prop="customerNo">
-              <el-input v-model="form.customerNo" placeholder="请输入客户编号" />
+              <el-input v-model="form.customerNo" placeholder="请输入客户编号" :disabled="form.customerId != null" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -355,13 +355,13 @@ function reset() {
     customerId: null,
     customerNo: null,
     customerName: null,
-    customerType: null,
+    customerType: '0',
     phone: null,
     email: null,
     address: null,
-    source: null,
-    level: null,
-    status: null,
+    source: '3',
+    level: 'C',
+    status: '0',
     ownerId: null,
     deptId: null,
     lastFollowTime: null,

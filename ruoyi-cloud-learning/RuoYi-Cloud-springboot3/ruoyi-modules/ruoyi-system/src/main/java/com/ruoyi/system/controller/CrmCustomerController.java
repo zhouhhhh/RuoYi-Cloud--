@@ -20,7 +20,7 @@ import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.core.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.web.page.TableDataInfo;
-
+import com.ruoyi.common.security.utils.SecurityUtils;
 /**
  * 客户档案Controller
  * 
@@ -77,6 +77,7 @@ public class CrmCustomerController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody CrmCustomer crmCustomer)
     {
+        crmCustomer.setCreateBy(SecurityUtils.getUsername());
         return toAjax(crmCustomerService.insertCrmCustomer(crmCustomer));
     }
 
@@ -88,6 +89,7 @@ public class CrmCustomerController extends BaseController
     @PutMapping
     public AjaxResult edit(@RequestBody CrmCustomer crmCustomer)
     {
+        crmCustomer.setUpdateBy(SecurityUtils.getUsername());
         return toAjax(crmCustomerService.updateCrmCustomer(crmCustomer));
     }
 
