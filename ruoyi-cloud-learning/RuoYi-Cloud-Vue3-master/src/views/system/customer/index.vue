@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="78px">
       <el-form-item label="客户编号" prop="customerNo">
         <el-input
           v-model="queryParams.customerNo"
@@ -17,8 +17,8 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="客户类型 0 个人客户 1 企业客户" prop="customerType">
-        <el-select v-model="queryParams.customerType" placeholder="请选择客户类型 0 个人客户 1 企业客户" clearable>
+      <el-form-item label="客户类型" prop="customerType">
+        <el-select v-model="queryParams.customerType" placeholder="请选择客户类型" clearable>
           <el-option
             v-for="dict in crm_customer_type"
             :key="dict.value"
@@ -35,8 +35,18 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="客户状态 0 潜在 1 跟进中 2 已成交 3 已流失" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择客户状态 0 潜在 1 跟进中 2 已成交 3 已流失" clearable>
+        <el-form-item label="客户来源" prop="source">
+          <el-select v-model="queryParams.source" placeholder="请选择客户来源" clearable>
+            <el-option
+              v-for="dict in crm_customer_source"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+      </el-form-item>
+      <el-form-item label="客户状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择客户状态" clearable>
           <el-option
             v-for="dict in crm_customer_status"
             :key="dict.value"
@@ -121,6 +131,11 @@
         </template>
       </el-table-column>
       <el-table-column label="联系电话" align="center" prop="phone" />
+      <el-table-column label="客户来源" align="center" prop="source">
+        <template #default="scope">
+          <dict-tag :options="crm_customer_source" :value="scope.row.source"/>
+        </template>
+      </el-table-column>
       <el-table-column label="客户等级" align="center" prop="level">
         <template #default="scope">
           <dict-tag :options="crm_customer_level" :value="scope.row.level"/>
@@ -142,7 +157,7 @@
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="210" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="View" @click="handleViewData(scope.row)" v-hasPermi="['system:customer:query']">详情</el-button>
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:customer:edit']">修改</el-button>
@@ -176,8 +191,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="客户类型 0 个人客户 1 企业客户" prop="customerType">
-              <el-select v-model="form.customerType" placeholder="请选择客户类型 0 个人客户 1 企业客户">
+            <el-form-item label="客户类型" prop="customerType">
+              <el-select v-model="form.customerType" placeholder="请选择客户类型">
                 <el-option
                   v-for="dict in crm_customer_type"
                   :key="dict.value"
@@ -203,8 +218,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="客户来源 0 主动开发1 客户推荐2 网络推广3 其他" prop="source">
-              <el-select v-model="form.source" placeholder="请选择客户来源 0 主动开发1 客户推荐2 网络推广3 其他">
+            <el-form-item label="客户来源" prop="source">
+              <el-select v-model="form.source" placeholder="请选择客户来源">
                 <el-option
                   v-for="dict in crm_customer_source"
                   :key="dict.value"
@@ -215,8 +230,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="客户等级 ABC" prop="level">
-              <el-select v-model="form.level" placeholder="请选择客户等级 ABC">
+            <el-form-item label="客户等级" prop="level">
+              <el-select v-model="form.level" placeholder="请选择客户等级">
                 <el-option
                   v-for="dict in crm_customer_level"
                   :key="dict.value"
@@ -227,7 +242,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="客户状态 0 潜在 1 跟进中 2 已成交 3 已流失" prop="status">
+            <el-form-item label="客户状态" prop="status">
               <el-radio-group v-model="form.status">
                 <el-radio
                   v-for="dict in crm_customer_status"
@@ -291,6 +306,7 @@ const data = reactive({
     customerName: undefined,
     customerType: undefined,
     phone: undefined,
+    source: undefined,
     status: undefined,
     ownerId: undefined,
     createTime: undefined,
@@ -303,19 +319,19 @@ const data = reactive({
       { required: true, message: "客户名称不能为空", trigger: "blur" }
     ],
     customerType: [
-      { required: true, message: "客户类型 0 个人客户 1 企业客户不能为空", trigger: "change" }
+      { required: true, message: "客户类型不能为空", trigger: "change" }
     ],
     phone: [
       { required: true, message: "联系电话不能为空", trigger: "blur" }
     ],
     source: [
-      { required: true, message: "客户来源 0 主动开发1 客户推荐2 网络推广3 其他不能为空", trigger: "change" }
+      { required: true, message: "客户来源不能为空", trigger: "change" }
     ],
     level: [
-      { required: true, message: "客户等级 ABC不能为空", trigger: "change" }
+      { required: true, message: "客户等级不能为空", trigger: "change" }
     ],
     status: [
-      { required: true, message: "客户状态 0 潜在 1 跟进中 2 已成交 3 已流失不能为空", trigger: "change" }
+      { required: true, message: "客户状态不能为空", trigger: "change" }
     ],
     ownerId: [
       { required: true, message: "负责人ID不能为空", trigger: "blur" }
