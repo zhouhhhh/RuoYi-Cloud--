@@ -91,23 +91,13 @@
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:customer:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
           type="danger"
           plain
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['system:customer:remove']"
-        >删除</el-button>
+        >批量删除</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -291,7 +281,6 @@ const open = ref(false)
 const loading = ref(true)
 const showSearch = ref(true)
 const ids = ref([])
-const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
@@ -407,7 +396,6 @@ function resetQuery() {
 /** 多选框选中数据 */
 function handleSelectionChange(selection) {
   ids.value = selection.map(item => item.customerId)
-  single.value = selection.length != 1
   multiple.value = !selection.length
 }
 
