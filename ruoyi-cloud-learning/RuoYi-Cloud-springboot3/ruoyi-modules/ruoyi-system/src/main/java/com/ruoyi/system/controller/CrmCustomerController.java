@@ -3,6 +3,7 @@ package com.ruoyi.system.controller;
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -75,7 +76,7 @@ public class CrmCustomerController extends BaseController
     @RequiresPermissions("system:customer:add")
     @Log(title = "客户档案", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody CrmCustomer crmCustomer)
+    public AjaxResult add(@Validated @RequestBody CrmCustomer crmCustomer)
     {
         crmCustomer.setCreateBy(SecurityUtils.getUsername());
         return toAjax(crmCustomerService.insertCrmCustomer(crmCustomer));
@@ -87,7 +88,7 @@ public class CrmCustomerController extends BaseController
     @RequiresPermissions("system:customer:edit")
     @Log(title = "客户档案", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody CrmCustomer crmCustomer)
+    public AjaxResult edit(@Validated @RequestBody CrmCustomer crmCustomer)
     {
         crmCustomer.setUpdateBy(SecurityUtils.getUsername());
         return toAjax(crmCustomerService.updateCrmCustomer(crmCustomer));

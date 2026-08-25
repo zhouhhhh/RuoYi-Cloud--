@@ -2,6 +2,8 @@ package com.ruoyi.system.domain;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.core.annotation.Excel;
@@ -113,6 +115,11 @@ public class CrmCustomer extends BaseEntity
         this.phone = phone;
     }
 
+    @NotBlank(message = "联系电话不能为空")
+    @Pattern(
+            regexp = "^1[3-9]\\d{9}$",
+            message = "请输入正确的手机号码"
+    )
     public String getPhone() 
     {
         return phone;
