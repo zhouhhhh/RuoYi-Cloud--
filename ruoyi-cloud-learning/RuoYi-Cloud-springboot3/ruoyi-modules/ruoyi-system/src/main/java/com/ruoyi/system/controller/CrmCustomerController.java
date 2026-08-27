@@ -79,6 +79,9 @@ public class CrmCustomerController extends BaseController
     public AjaxResult add(@Validated @RequestBody CrmCustomer crmCustomer)
     {
         crmCustomer.setCreateBy(SecurityUtils.getUsername());
+        if (!crmCustomerService.checkPhoneUnique(crmCustomer)) {
+            return error("新增客户'" + crmCustomer.getCustomerName() + "'失败，手机号码已存在");
+        }
         return toAjax(crmCustomerService.insertCrmCustomer(crmCustomer));
     }
 
@@ -91,6 +94,9 @@ public class CrmCustomerController extends BaseController
     public AjaxResult edit(@Validated @RequestBody CrmCustomer crmCustomer)
     {
         crmCustomer.setUpdateBy(SecurityUtils.getUsername());
+        if (!crmCustomerService.checkPhoneUnique(crmCustomer)) {
+            return error("修改客户'" + crmCustomer.getCustomerName() + "'失败，手机号码已存在");
+        }
         return toAjax(crmCustomerService.updateCrmCustomer(crmCustomer));
     }
 

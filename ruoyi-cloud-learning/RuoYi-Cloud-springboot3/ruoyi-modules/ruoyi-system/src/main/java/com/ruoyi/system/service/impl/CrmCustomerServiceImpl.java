@@ -2,6 +2,7 @@ package com.ruoyi.system.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.core.utils.DateUtils;
+import com.ruoyi.common.core.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.CrmCustomerMapper;
@@ -15,7 +16,7 @@ import com.ruoyi.system.service.ICrmCustomerService;
  * @date 2026-08-05
  */
 @Service
-public class CrmCustomerServiceImpl implements ICrmCustomerService 
+public class CrmCustomerServiceImpl implements ICrmCustomerService
 {
     @Autowired
     private CrmCustomerMapper crmCustomerMapper;
@@ -92,5 +93,15 @@ public class CrmCustomerServiceImpl implements ICrmCustomerService
     public int deleteCrmCustomerByCustomerId(Long customerId)
     {
         return crmCustomerMapper.deleteCrmCustomerByCustomerId(customerId);
+    }
+
+    @Override
+    public boolean checkPhoneUnique(CrmCustomer customer) {
+        Long customerId = StringUtils.isNull(customer.getCustomerId()) ? -1L : customer.getCustomerId();
+        CrmCustomer checkedCrmCustomer = crmCustomerMapper.selectCrmCustomerByPhone(customer.getPhone());
+        if (StringUtils.isNotNull(checkedCrmCustomer) && checkedCrmCustomer.getCustomerId().longValue() != customerId.longValue()) {
+            return false;
+        }
+        return true;
     }
 }

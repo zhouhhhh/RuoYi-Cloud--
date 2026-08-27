@@ -58,4 +58,13 @@ public interface ICrmCustomerService
      * @return 结果
      */
     public int deleteCrmCustomerByCustomerId(Long customerId);
+
+
+    /**
+     * 检查手机号是否重复
+     * 
+     * @param customer
+     * @return
+     */
+    public boolean checkPhoneUnique(CrmCustomer customer);
 }

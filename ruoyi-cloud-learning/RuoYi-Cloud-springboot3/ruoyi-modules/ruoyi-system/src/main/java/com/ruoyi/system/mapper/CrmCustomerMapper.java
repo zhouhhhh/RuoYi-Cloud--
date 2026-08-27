@@ -58,4 +58,12 @@ public interface CrmCustomerMapper
      * @return 结果
      */
     public int deleteCrmCustomerByCustomerIds(Long[] customerIds);
+
+    /**
+     * 查询手机号是否重复
+     *
+     * @param phone 需要查找的手机号
+     * @return 结果
+     */
+    public CrmCustomer selectCrmCustomerByPhone(String phone);
 }

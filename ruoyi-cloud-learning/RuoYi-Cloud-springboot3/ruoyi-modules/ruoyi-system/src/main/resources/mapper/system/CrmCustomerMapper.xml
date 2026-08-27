@@ -121,4 +121,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{customerId}
         </foreach>
     </delete>
+
+    <select id="selectCrmCustomerByPhone" parameterType="String" resultMap="CrmCustomerResult">
+        select customer_id, phone from crm_customer where phone = #{phone} limit 1
+    </select>
 </mapper>
