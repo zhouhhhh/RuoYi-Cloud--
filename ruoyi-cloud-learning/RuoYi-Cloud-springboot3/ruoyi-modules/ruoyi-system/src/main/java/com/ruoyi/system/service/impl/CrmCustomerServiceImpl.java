@@ -1,9 +1,14 @@
 package com.ruoyi.system.service.impl;
 
 import java.util.List;
+
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.CrmCustomerMapper;
 import com.ruoyi.system.domain.CrmCustomer;
@@ -18,6 +23,8 @@ import com.ruoyi.system.service.ICrmCustomerService;
 @Service
 public class CrmCustomerServiceImpl implements ICrmCustomerService
 {
+    private static final Logger log = LoggerFactory.getLogger(CrmCustomerServiceImpl.class);
+
     @Autowired
     private CrmCustomerMapper crmCustomerMapper;
 
@@ -55,7 +62,14 @@ public class CrmCustomerServiceImpl implements ICrmCustomerService
     public int insertCrmCustomer(CrmCustomer crmCustomer)
     {
         crmCustomer.setCreateTime(DateUtils.getNowDate());
-        return crmCustomerMapper.insertCrmCustomer(crmCustomer);
+        try
+        {
+            return crmCustomerMapper.insertCrmCustomer(crmCustomer);
+        }
+        catch (DuplicateKeyException e)
+        {
+            throw translateDuplicateKeyException("新增", e);
+        }
     }
 
     /**
@@ -68,7 +82,14 @@ public class CrmCustomerServiceImpl implements ICrmCustomerService
     public int updateCrmCustomer(CrmCustomer crmCustomer)
     {
         crmCustomer.setUpdateTime(DateUtils.getNowDate());
-        return crmCustomerMapper.updateCrmCustomer(crmCustomer);
+        try
+        {
+            return crmCustomerMapper.updateCrmCustomer(crmCustomer);
+        }
+        catch (DuplicateKeyException e)
+        {
+            throw translateDuplicateKeyException("修改", e);
+        }
     }
 
     /**
@@ -95,6 +116,11 @@ public class CrmCustomerServiceImpl implements ICrmCustomerService
         return crmCustomerMapper.deleteCrmCustomerByCustomerId(customerId);
     }
 
+    /**
+     * 确认手机号码是否存在
+     * @param customer
+     * @return
+     */
     @Override
     public boolean checkPhoneUnique(CrmCustomer customer) {
         Long customerId = StringUtils.isNull(customer.getCustomerId()) ? -1L : customer.getCustomerId();
@@ -103,5 +129,26 @@ public class CrmCustomerServiceImpl implements ICrmCustomerService
             return false;
         }
         return true;
+    }
+
+    /**
+     * 封装的内部使用的工具方法 主要用在索引异常处理
+     * @param operation
+     * @param e
+     * @return
+     */
+    private ServiceException translateDuplicateKeyException(
+            String operation, DuplicateKeyException e)
+    {
+        log.error("{}客户时发生唯一索引冲突", operation, e);
+
+        Throwable rootCause = e.getMostSpecificCause();
+        String rootMessage = rootCause.getMessage();
+
+        if (StringUtils.contains(rootMessage, "uk_customer_phone"))
+        {
+            return new ServiceException("手机号码已存在");
+        }
+        return new ServiceException("客户数据存在唯一性冲突");
     }
 }

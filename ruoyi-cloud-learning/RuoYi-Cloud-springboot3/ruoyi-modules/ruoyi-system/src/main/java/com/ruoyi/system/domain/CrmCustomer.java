@@ -170,6 +170,11 @@ public class CrmCustomer extends BaseEntity
         this.status = status;
     }
 
+    @NotBlank(message = "状态不能为空")
+    @Pattern(
+            regexp = "^[0-3]$",
+            message = "请输入正确的状态"
+    )
     public String getStatus() 
     {
         return status;
