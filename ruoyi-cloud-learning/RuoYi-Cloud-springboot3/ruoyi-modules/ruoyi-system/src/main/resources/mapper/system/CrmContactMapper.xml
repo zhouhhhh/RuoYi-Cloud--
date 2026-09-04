@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.CrmContactMapper">
+    
+    <resultMap type="CrmContact" id="CrmContactResult">
+        <result property="contactId"    column="contact_id"    />
+        <result property="customerId"    column="customer_id"    />
+        <result property="contactName"    column="contact_name"    />
+        <result property="phone"    column="phone"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectCrmContactVo">
+        select contact_id, customer_id, contact_name, phone, del_flag, create_by, create_time, update_by, update_time, remark from crm_contact
+    </sql>
+
+    <select id="selectCrmContactList" parameterType="CrmContact" resultMap="CrmContactResult">
+        <include refid="selectCrmContactVo"/>
+        <where>  
+            <if test="customerId != null "> and customer_id = #{customerId}</if>
+            <if test="contactName != null  and contactName != ''"> and contact_name like concat('%', #{contactName}, '%')</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+        </where>
+    </select>
+    
+    <select id="selectCrmContactByContactId" parameterType="Long" resultMap="CrmContactResult">
+        <include refid="selectCrmContactVo"/>
+        where contact_id = #{contactId}
+    </select>
+
+    <insert id="insertCrmContact" parameterType="CrmContact" useGeneratedKeys="true" keyProperty="contactId">
+        insert into crm_contact
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="customerId != null">customer_id,</if>
+            <if test="contactName != null and contactName != ''">contact_name,</if>
+            <if test="phone != null">phone,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="customerId != null">#{customerId},</if>
+            <if test="contactName != null and contactName != ''">#{contactName},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCrmContact" parameterType="CrmContact">
+        update crm_contact
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="customerId != null">customer_id = #{customerId},</if>
+            <if test="contactName != null and contactName != ''">contact_name = #{contactName},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where contact_id = #{contactId}
+    </update>
+
+    <delete id="deleteCrmContactByContactId" parameterType="Long">
+        delete from crm_contact where contact_id = #{contactId}
+    </delete>
+
+    <delete id="deleteCrmContactByContactIds" parameterType="String">
+        delete from crm_contact where contact_id in 
+        <foreach item="contactId" collection="array" open="(" separator="," close=")">
+            #{contactId}
+        </foreach>
+    </delete>
+</mapper>
