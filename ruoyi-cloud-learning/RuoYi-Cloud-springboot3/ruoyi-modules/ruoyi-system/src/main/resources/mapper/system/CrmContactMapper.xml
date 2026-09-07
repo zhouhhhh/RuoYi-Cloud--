@@ -27,12 +27,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="customerId != null "> and customer_id = #{customerId}</if>
             <if test="contactName != null  and contactName != ''"> and contact_name like concat('%', #{contactName}, '%')</if>
             <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+            and del_flag = '0'
         </where>
+        order by create_time desc, contact_id desc
     </select>
     
     <select id="selectCrmContactByContactId" parameterType="Long" resultMap="CrmContactResult">
         <include refid="selectCrmContactVo"/>
-        where contact_id = #{contactId}
+        where contact_id = #{contactId} and del_flag = '0'
     </select>
 
     <insert id="insertCrmContact" parameterType="CrmContact" useGeneratedKeys="true" keyProperty="contactId">
@@ -41,22 +43,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="customerId != null">customer_id,</if>
             <if test="contactName != null and contactName != ''">contact_name,</if>
             <if test="phone != null">phone,</if>
-            <if test="delFlag != null">del_flag,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
-            <if test="updateBy != null">update_by,</if>
-            <if test="updateTime != null">update_time,</if>
             <if test="remark != null">remark,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="customerId != null">#{customerId},</if>
             <if test="contactName != null and contactName != ''">#{contactName},</if>
             <if test="phone != null">#{phone},</if>
-            <if test="delFlag != null">#{delFlag},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
-            <if test="updateBy != null">#{updateBy},</if>
-            <if test="updateTime != null">#{updateTime},</if>
             <if test="remark != null">#{remark},</if>
          </trim>
     </insert>
@@ -78,11 +74,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
     <delete id="deleteCrmContactByContactId" parameterType="Long">
-        delete from crm_contact where contact_id = #{contactId}
+        update crm_contact set del_flag = '2' where contact_id = #{contactId}
     </delete>
 
-    <delete id="deleteCrmContactByContactIds" parameterType="String">
-        delete from crm_contact where contact_id in 
+    <delete id="deleteCrmContactByContactIds" parameterType="Long">
+        update crm_contact set del_flag = '2' where contact_id in
         <foreach item="contactId" collection="array" open="(" separator="," close=")">
             #{contactId}
         </foreach>

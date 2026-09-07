@@ -1,5 +1,7 @@
 package com.ruoyi.system.domain;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.core.annotation.Excel;
@@ -47,7 +49,8 @@ public class CrmContact extends BaseEntity
         this.customerId = customerId;
     }
 
-    public Long getCustomerId() 
+    @NotNull(message = "所属客户不能为空")
+    public Long getCustomerId()
     {
         return customerId;
     }
@@ -57,7 +60,8 @@ public class CrmContact extends BaseEntity
         this.contactName = contactName;
     }
 
-    public String getContactName() 
+    @NotBlank(message = "联系人姓名不能为空")
+    public String getContactName()
     {
         return contactName;
     }
