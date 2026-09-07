@@ -95,6 +95,7 @@ public class CrmCustomer extends BaseEntity
         this.customerName = customerName;
     }
 
+    @NotBlank(message = "客户名称不能为空")
     public String getCustomerName() 
     {
         return customerName;

@@ -1,15 +1,15 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="所属客户，与客户主键类型一致" prop="customerId">
+      <el-form-item label="所属客户" prop="customerId">
         <el-input
           v-model="queryParams.customerId"
-          placeholder="请输入所属客户，与客户主键类型一致"
+          placeholder="请输入所属客户"
           clearable
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="联系人姓名" prop="contactName">
+      <el-form-item label="联系人姓名" prop="contactName" label-width="100px">
         <el-input
           v-model="queryParams.contactName"
           placeholder="请输入联系人姓名"
@@ -17,10 +17,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="联系电话，按字符串保存" prop="phone">
+      <el-form-item label="联系电话" prop="phone">
         <el-input
           v-model="queryParams.phone"
-          placeholder="请输入联系电话，按字符串保存"
+          placeholder="请输入联系电话"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -77,7 +77,7 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="联系人记录 ID" align="center" prop="contactId" />
       <el-table-column label="联系人姓名" align="center" prop="contactName" />
-      <el-table-column label="联系电话，按字符串保存" align="center" prop="phone" />
+      <el-table-column label="联系电话" align="center" prop="phone" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:contact:edit']">修改</el-button>
@@ -99,8 +99,8 @@
       <el-form ref="contactRef" :model="form" :rules="rules" label-width="100px">
         <el-row>
           <el-col :span="24">
-            <el-form-item label="所属客户，与客户主键类型一致" prop="customerId">
-              <el-input v-model="form.customerId" placeholder="请输入所属客户，与客户主键类型一致" />
+            <el-form-item label="所属客户" prop="customerId">
+              <el-input v-model="form.customerId" placeholder="请输入所属客户" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
