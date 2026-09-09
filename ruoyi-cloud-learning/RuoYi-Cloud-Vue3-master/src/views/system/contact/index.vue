@@ -100,7 +100,11 @@
         <el-row>
           <el-col :span="24">
             <el-form-item label="所属客户" prop="customerId">
-              <el-input v-model="form.customerId" placeholder="请输入所属客户" />
+              <el-input
+                v-model="form.customerId"
+                :disabled="form.contactId != null"
+                placeholder="请输入所属客户"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="24">

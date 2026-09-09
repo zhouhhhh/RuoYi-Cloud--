@@ -89,8 +89,9 @@ public class CrmContactController extends BaseController
     @RequiresPermissions("system:contact:edit")
     @Log(title = "联系人管理", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody CrmContact crmContact)
+    public AjaxResult edit(@Validated @RequestBody CrmContact crmContact)
     {
+        crmContact.setUpdateBy(SecurityUtils.getUsername());
         return toAjax(crmContactService.updateCrmContact(crmContact));
     }
 

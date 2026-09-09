@@ -1,7 +1,10 @@
 package com.ruoyi.system.service.impl;
 
 import java.util.List;
+
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
+import com.ruoyi.system.mapper.CrmCustomerMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.CrmContactMapper;
@@ -19,6 +22,9 @@ public class CrmContactServiceImpl implements ICrmContactService
 {
     @Autowired
     private CrmContactMapper crmContactMapper;
+
+    @Autowired
+    private CrmCustomerMapper crmCustomerMapper;
 
     /**
      * 查询联系人管理
@@ -53,6 +59,10 @@ public class CrmContactServiceImpl implements ICrmContactService
     @Override
     public int insertCrmContact(CrmContact crmContact)
     {
+        if (crmCustomerMapper.selectCrmCustomerByCustomerId(crmContact.getCustomerId()) == null)
+        {
+            throw new ServiceException("客户不存在或已删除，不能新增联系人");
+        }
         crmContact.setCreateTime(DateUtils.getNowDate());
         return crmContactMapper.insertCrmContact(crmContact);
     }
@@ -66,6 +76,10 @@ public class CrmContactServiceImpl implements ICrmContactService
     @Override
     public int updateCrmContact(CrmContact crmContact)
     {
+        if (crmContactMapper.selectCrmContactByContactId(crmContact.getContactId()) == null)
+        {
+            throw new ServiceException("联系人不存在或已删除，不能修改");
+        }
         crmContact.setUpdateTime(DateUtils.getNowDate());
         return crmContactMapper.updateCrmContact(crmContact);
     }
