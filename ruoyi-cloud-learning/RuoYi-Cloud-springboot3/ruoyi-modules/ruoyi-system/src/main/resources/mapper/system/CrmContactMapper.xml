@@ -79,4 +79,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{contactId}
         </foreach>
     </delete>
+
+    <select id="countActiveContactsByCustomerIds" resultType="int">
+        select count(1)
+        from crm_contact
+        where del_flag = '0'
+        and customer_id in
+        <foreach item="customerId"
+                 collection="array"
+                 open="("
+                 separator=","
+                 close=")">
+            #{customerId}
+        </foreach>
+    </select>
 </mapper>

@@ -58,4 +58,12 @@ public interface CrmContactMapper
      * @return 结果
      */
     public int deleteCrmContactByContactIds(Long[] contactIds);
+
+
+    /**
+     * 检查客户下是否还有联系人
+     * @param customerIds
+     * @return
+     */
+    int countActiveContactsByCustomerIds(Long[] customerIds);
 }

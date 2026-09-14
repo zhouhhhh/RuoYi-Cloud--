@@ -5,6 +5,7 @@ import java.util.List;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.StringUtils;
+import com.ruoyi.system.mapper.CrmContactMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ public class CrmCustomerServiceImpl implements ICrmCustomerService
     @Autowired
     private CrmCustomerMapper crmCustomerMapper;
 
+    @Autowired
+    private CrmContactMapper crmContactMapper;
     /**
      * 查询客户档案
      * 
@@ -101,6 +104,7 @@ public class CrmCustomerServiceImpl implements ICrmCustomerService
     @Override
     public int deleteCrmCustomerByCustomerIds(Long[] customerIds)
     {
+        checkNoActiveContacts(customerIds);
         return crmCustomerMapper.deleteCrmCustomerByCustomerIds(customerIds);
     }
 
@@ -113,6 +117,7 @@ public class CrmCustomerServiceImpl implements ICrmCustomerService
     @Override
     public int deleteCrmCustomerByCustomerId(Long customerId)
     {
+        checkNoActiveContacts(new Long[]{customerId});
         return crmCustomerMapper.deleteCrmCustomerByCustomerId(customerId);
     }
 
@@ -150,5 +155,17 @@ public class CrmCustomerServiceImpl implements ICrmCustomerService
             return new ServiceException("手机号码已存在");
         }
         return new ServiceException("客户数据存在唯一性冲突");
+    }
+
+    /**
+     * 封装的内部方法，检查所选客户下是否存在联系人
+     * @param customerIds
+     */
+    private void checkNoActiveContacts(Long[] customerIds)
+    {
+        if (crmContactMapper.countActiveContactsByCustomerIds(customerIds) > 0)
+        {
+            throw new ServiceException("所选客户存在未删除联系人，请先处理联系人");
+        }
     }
 }
