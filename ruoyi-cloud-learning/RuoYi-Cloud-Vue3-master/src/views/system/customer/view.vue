@@ -165,13 +165,21 @@
                 <el-table-column label="联系电话" align="center" prop="phone" />
                 <el-table-column label="备注" align="center" prop="remark" />
                 <el-table-column label="创建时间" align="center" prop="createTime" />
+                <el-table-column label="操作" align="center" width="210" class-name="small-padding fixed-width">
+                    <template #default="scope">
+                        <el-button link type="primary" icon="Edit" @click="handleContactUpdate(scope.row)"
+                            v-hasPermi="['system:contact:edit']">修改</el-button>
+                        <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)"
+                            v-hasPermi="['system:contact:remove']">删除</el-button>
+                    </template>
+                </el-table-column>
             </el-table>
             <pagination v-show="contactTotal > 0" :total="contactTotal" v-model:page="contactQueryParams.pageNum"
                 v-model:limit="contactQueryParams.pageSize" @pagination="fetchContactListByCustomerId" />
         </div>
 
-        <!-- 新增联系人对话框 -->
-        <el-dialog v-model="contactDialogVisible" title="新增联系人" width="500px" append-to-body>
+        <!-- 新增或修改联系人对话框 -->
+        <el-dialog v-model="contactDialogVisible" :title="contactDialogTitle" width="500px" append-to-body>
             <el-form ref="contactFormRef" :model="contactForm" :rules="contactRules" label-width="100px">
                 <el-form-item label="所属客户" prop="customerId">
                     <el-input :model-value="`${info.customerName}（ID：${contactForm.customerId}）`" disabled />
@@ -230,24 +238,26 @@ const contactQueryParams = reactive({
 })
 const contactTotal = ref(0)
 
-const contactFormRef = ref();
-const contactDialogVisible = ref(false);
-const contactSubmitting = ref(false);
+const contactFormRef = ref()
+const contactDialogVisible = ref(false)
+const contactSubmitting = ref(false)
 
 const contactForm = reactive({
-  customerId: null,
-  contactName: "",
-  phone: "",
-  remark: ""
-});
+    customerId: null,
+    contactId: null,
+    contactName: "",
+    phone: "",
+    remark: ""
+})
+const contactDialogTitle = ref("")
 
 const contactRules = {
-  customerId: [
-    { required: true, message: "所属客户不能为空", trigger: "change" }
-  ],
-  contactName: [
-    { required: true, message: "联系人姓名不能为空", trigger: "blur" }
-  ]
+    customerId: [
+        { required: true, message: "所属客户不能为空", trigger: "change" }
+    ],
+    contactName: [
+        { required: true, message: "联系人姓名不能为空", trigger: "blur" }
+    ]
 };
 
 const open = async (customerId) => {
@@ -296,42 +306,58 @@ function fetchContactListByCustomerId () {
         })
 }
 
-function handleAddContact() {
-  Object.assign(contactForm, {
-    customerId: info.customerId,
-    contactName: "",
-    phone: "",
-    remark: ""
-  });
+function handleAddContact () {
+    Object.assign(contactForm, {
+        customerId: info.customerId,
+        contactName: "",
+        phone: "",
+        remark: ""
+    });
 
-  contactDialogVisible.value = true;
+    contactDialogVisible.value = true;
+    contactDialogTitle.value = "新增联系人";
 
-  nextTick(() => {
-    contactFormRef.value?.clearValidate();
-  });
+    nextTick(() => {
+        contactFormRef.value?.clearValidate();
+    });
 }
 
-async function submitContact() {
-  const valid = await contactFormRef.value
-    .validate()
-    .catch(() => false);
+async function submitContact () {
+    const valid = await contactFormRef.value
+        .validate()
+        .catch(() => false);
 
-  if (!valid) {
-    return;
-  }
+    if (!valid) {
+        return;
+    }
 
-  contactSubmitting.value = true;
+    contactSubmitting.value = true;
 
-  try {
-    await addContact({ ...contactForm });
-    proxy.$modal.msgSuccess("新增成功");
-    contactDialogVisible.value = false;
+    try {
+        await addContact({ ...contactForm });
+        proxy.$modal.msgSuccess("新增成功");
+        contactDialogVisible.value = false;
 
-    contactQueryParams.pageNum = 1;
-    fetchContactListByCustomerId();
-  } finally {
-    contactSubmitting.value = false;
-  }
+        contactQueryParams.pageNum = 1;
+        fetchContactListByCustomerId();
+    } finally {
+        contactSubmitting.value = false;
+    }
+}
+function handleContactUpdate (row) {
+    Object.assign(contactForm, {
+        customerId: row.customerId,
+        contactName: row.contactName,
+        phone: row.phone,
+        remark: row.remark
+    });
+
+    contactDialogVisible.value = true;
+    contactDialogTitle.value = "修改联系人";
+
+    nextTick(() => {
+        contactFormRef.value?.clearValidate();
+    });
 }
 
 defineExpose({ open })
