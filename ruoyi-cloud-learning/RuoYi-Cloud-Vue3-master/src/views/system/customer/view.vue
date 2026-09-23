@@ -169,8 +169,6 @@
                     <template #default="scope">
                         <el-button link type="primary" icon="Edit" @click="handleContactUpdate(scope.row)"
                             v-hasPermi="['system:contact:edit']">修改</el-button>
-                        <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)"
-                            v-hasPermi="['system:contact:remove']">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -210,9 +208,11 @@
 
 <script setup name="CustomerViewDrawer">
 import { getCustomer } from '@/api/system/customer'
-import { listContact, addContact } from '@/api/system/contact'
+import { listContact, addContact, getContact, updateContact } from '@/api/system/contact'
+import { reactive } from 'vue'
 
 const { proxy } = getCurrentInstance()
+
 const {
     crm_customer_source,
     crm_customer_level,
@@ -228,48 +228,54 @@ const {
 const visible = ref(false)
 const loading = ref(false)
 const info = reactive({})
-
 const contactLoading = ref(false)
 const contactListByCustomerId = ref([])
-const contactQueryParams = reactive({
-    pageNum: 1,
-    pageSize: 5,
-    customerId: null,
-})
 const contactTotal = ref(0)
-
 const contactFormRef = ref()
 const contactDialogVisible = ref(false)
 const contactSubmitting = ref(false)
-
-const contactForm = reactive({
-    customerId: null,
-    contactId: null,
-    contactName: "",
-    phone: "",
-    remark: ""
-})
 const contactDialogTitle = ref("")
 
-const contactRules = {
-    customerId: [
-        { required: true, message: "所属客户不能为空", trigger: "change" }
-    ],
-    contactName: [
-        { required: true, message: "联系人姓名不能为空", trigger: "blur" }
-    ]
-};
+const data = reactive({
+    contactForm: {},
+    contactQueryParams: {
+        pageNum: 1,
+        pageSize: 5,
+        customerId: null
+    },
+    contactRules: {
+        customerId: [
+            { required: true, message: "所属客户不能为空", trigger: "change" }
+        ],
+        contactName: [
+            { required: true, message: "联系人姓名不能为空", trigger: "blur" }
+        ]
+    }
+})
+
+const { contactForm, contactQueryParams, contactRules } = toRefs(data)
+
+/** 联系人表单重置 */
+function contactFormReset () {
+    contactForm.value = {
+        customerId: null,
+        contactId: null,
+        contactName: "",
+        phone: "",
+        remark: ""
+    }
+}
 
 const open = async (customerId) => {
     visible.value = true
     loading.value = true
     contactListByCustomerId.value = []
-    contactQueryParams.customerId = customerId
-    contactQueryParams.pageNum = 1
+    contactQueryParams.value.customerId = customerId
+    contactQueryParams.value.pageNum = 1
     try {
         const res = await getCustomer(customerId)
         Object.assign(info, res.data || {})
-        const contactRes = await listContact(contactQueryParams)
+        const contactRes = await listContact(contactQueryParams.value)
         contactListByCustomerId.value = contactRes.rows || []
         contactTotal.value = contactRes.total || 0
     } catch (error) {
@@ -283,17 +289,17 @@ function handleClose () {
     visible.value = false
     contactLoading.value = false
     contactListByCustomerId.value = []
-    contactQueryParams.pageNum = 1
-    contactQueryParams.pageSize = 5
-    contactQueryParams.customerId = null
+    contactQueryParams.value.pageNum = 1
+    contactQueryParams.value.pageSize = 5
+    contactQueryParams.value.customerId = null
     contactTotal.value = 0
     Object.keys(info).forEach((key) => delete info[key])
 }
 
 function fetchContactListByCustomerId () {
     contactLoading.value = true
-    contactQueryParams.customerId = info.customerId
-    listContact(contactQueryParams)
+    contactQueryParams.value.customerId = info.customerId
+    listContact(contactQueryParams.value)
         .then((res) => {
             contactListByCustomerId.value = res.rows || []
             contactTotal.value = res.total || 0
@@ -306,13 +312,10 @@ function fetchContactListByCustomerId () {
         })
 }
 
+/** 新增联系人 */
 function handleAddContact () {
-    Object.assign(contactForm, {
-        customerId: info.customerId,
-        contactName: "",
-        phone: "",
-        remark: ""
-    });
+    contactFormReset();
+    contactForm.value.customerId = info.customerId;
 
     contactDialogVisible.value = true;
     contactDialogTitle.value = "新增联系人";
@@ -322,6 +325,7 @@ function handleAddContact () {
     });
 }
 
+/* 提交联系人表单 */
 async function submitContact () {
     const valid = await contactFormRef.value
         .validate()
@@ -334,30 +338,45 @@ async function submitContact () {
     contactSubmitting.value = true;
 
     try {
-        await addContact({ ...contactForm });
-        proxy.$modal.msgSuccess("新增成功");
-        contactDialogVisible.value = false;
+        if (contactForm.value.contactId) {
+            await updateContact(contactForm.value);
+            proxy.$modal.msgSuccess("修改成功");
+            contactDialogVisible.value = false;
 
-        contactQueryParams.pageNum = 1;
-        fetchContactListByCustomerId();
+            fetchContactListByCustomerId();
+        } else {
+            await addContact(contactForm.value);
+            proxy.$modal.msgSuccess("新增成功");
+            contactDialogVisible.value = false;
+
+            contactQueryParams.value.pageNum = 1;
+            fetchContactListByCustomerId();
+        }
     } finally {
         contactSubmitting.value = false;
     }
 }
-function handleContactUpdate (row) {
-    Object.assign(contactForm, {
-        customerId: row.customerId,
-        contactName: row.contactName,
-        phone: row.phone,
-        remark: row.remark
-    });
 
-    contactDialogVisible.value = true;
-    contactDialogTitle.value = "修改联系人";
+/** 修改联系人 */
+async function handleContactUpdate (row) {
+    contactFormReset();
+    const response = await getContact(row.contactId)
+    const contact = response.data
+
+    contactForm.value = {
+        customerId: contact.customerId,
+        contactId: contact.contactId,
+        contactName: contact.contactName,
+        phone: contact.phone,
+        remark: contact.remark
+    }
+
+    contactDialogTitle.value = "修改联系人"
+    contactDialogVisible.value = true
 
     nextTick(() => {
-        contactFormRef.value?.clearValidate();
-    });
+        contactFormRef.value?.clearValidate()
+    })
 }
 
 defineExpose({ open })
