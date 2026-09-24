@@ -266,6 +266,7 @@ function contactFormReset () {
     }
 }
 
+/** 打开客户档案详情抽屉 */
 const open = async (customerId) => {
     visible.value = true
     loading.value = true
@@ -285,6 +286,7 @@ const open = async (customerId) => {
     }
 }
 
+/** 关闭客户档案详情抽屉 */
 function handleClose () {
     visible.value = false
     contactLoading.value = false
@@ -296,6 +298,7 @@ function handleClose () {
     Object.keys(info).forEach((key) => delete info[key])
 }
 
+/** 根据客户ID获取联系人列表 */
 function fetchContactListByCustomerId () {
     contactLoading.value = true
     contactQueryParams.value.customerId = info.customerId
@@ -362,6 +365,12 @@ async function handleContactUpdate (row) {
     contactFormReset();
     const response = await getContact(row.contactId)
     const contact = response.data
+
+    if (!contact) {
+        proxy.$modal.msgError("联系人不存在或已删除")
+        fetchContactListByCustomerId()
+        return
+    }
 
     contactForm.value = {
         customerId: contact.customerId,
