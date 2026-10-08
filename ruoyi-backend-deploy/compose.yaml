@@ -1,0 +1,181 @@
+# 后端应用独立部署；不创建或修改现有 MySQL / Redis / Nacos。
+name: ruoyi-backend
+
+x-common: &common
+  restart: unless-stopped
+  stop_grace_period: 45s
+  init: true
+  networks:
+    - infrastructure
+  logging:
+    driver: json-file
+    options:
+      max-size: "20m"
+      max-file: "3"
+
+x-env: &environment
+  TZ: Asia/Shanghai
+  MYSQL_HOST: "${MYSQL_HOST:-192.168.106.199}"
+  JAVA_TOOL_OPTIONS: "-Xms128m -Xmx512m -Dfile.encoding=UTF-8"
+  # 现有基础设施没有 Sentinel 控制台；此版不启用 Sentinel。
+  SPRING_CLOUD_SENTINEL_ENABLED: "false"
+
+x-command: &command
+  - "--spring.profiles.active=${APP_PROFILE:-dev}"
+  - "--spring.cloud.nacos.discovery.server-addr=${NACOS_ADDR:-rcl-nacos:8848}"
+  - "--spring.cloud.nacos.config.server-addr=${NACOS_ADDR:-rcl-nacos:8848}"
+  - "--spring.cloud.nacos.discovery.namespace=${NACOS_NAMESPACE:-}"
+  - "--spring.cloud.nacos.config.namespace=${NACOS_NAMESPACE:-}"
+  - "--spring.cloud.nacos.discovery.group=${NACOS_GROUP:-DEFAULT_GROUP}"
+  - "--spring.cloud.nacos.config.group=${NACOS_GROUP:-DEFAULT_GROUP}"
+  - "--spring.cloud.nacos.discovery.username=${NACOS_USERNAME:-}"
+  - "--spring.cloud.nacos.discovery.password=${NACOS_PASSWORD:-}"
+  - "--spring.cloud.nacos.config.username=${NACOS_USERNAME:-}"
+  - "--spring.cloud.nacos.config.password=${NACOS_PASSWORD:-}"
+
+services:
+  gateway:
+    <<: *common
+    image: "ruoyi-learning/gateway:${GATEWAY_VERSION:-initial}"
+    build:
+      context: ./build/gateway
+      args:
+        JAVA_IMAGE: "${JAVA_IMAGE:-eclipse-temurin:17-jre-jammy}"
+    mem_limit: 1g
+    environment:
+      <<: *environment
+    command: *command
+    ports:
+      - "${SERVER_IP:-192.168.106.199}:8080:8080"
+    volumes:
+      - gateway-logs:/app/logs
+
+  auth:
+    <<: *common
+    image: "ruoyi-learning/auth:${AUTH_VERSION:-initial}"
+    build:
+      context: ./build/auth
+      args:
+        JAVA_IMAGE: "${JAVA_IMAGE:-eclipse-temurin:17-jre-jammy}"
+    mem_limit: 1g
+    environment:
+      <<: *environment
+    command: *command
+    expose:
+      - "9200"
+    volumes:
+      - auth-logs:/app/logs
+
+  system:
+    <<: *common
+    image: "ruoyi-learning/system:${SYSTEM_VERSION:-initial}"
+    build:
+      context: ./build/system
+      args:
+        JAVA_IMAGE: "${JAVA_IMAGE:-eclipse-temurin:17-jre-jammy}"
+    mem_limit: 1536m
+    environment:
+      <<: *environment
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx768m -Dfile.encoding=UTF-8"
+    command: *command
+    expose:
+      - "9201"
+    volumes:
+      - system-logs:/app/logs
+
+  gen:
+    <<: *common
+    image: "ruoyi-learning/gen:${GEN_VERSION:-initial}"
+    build:
+      context: ./build/gen
+      args:
+        JAVA_IMAGE: "${JAVA_IMAGE:-eclipse-temurin:17-jre-jammy}"
+    mem_limit: 1g
+    environment:
+      <<: *environment
+    command: *command
+    expose:
+      - "9202"
+    volumes:
+      - gen-logs:/app/logs
+
+  job:
+    <<: *common
+    image: "ruoyi-learning/job:${JOB_VERSION:-initial}"
+    build:
+      context: ./build/job
+      args:
+        JAVA_IMAGE: "${JAVA_IMAGE:-eclipse-temurin:17-jre-jammy}"
+    mem_limit: 1g
+    environment:
+      <<: *environment
+    command: *command
+    expose:
+      - "9203"
+    volumes:
+      - job-logs:/app/logs
+
+  file:
+    <<: *common
+    image: "ruoyi-learning/file:${FILE_VERSION:-initial}"
+    build:
+      context: ./build/file
+      args:
+        JAVA_IMAGE: "${JAVA_IMAGE:-eclipse-temurin:17-jre-jammy}"
+    mem_limit: 1g
+    environment:
+      <<: *environment
+      FILE_PATH: /data/uploads
+      FILE_PREFIX: /statics
+      FILE_DOMAIN: "http://${SERVER_IP:-192.168.106.199}:9300"
+    command:
+      - "--spring.profiles.active=${APP_PROFILE:-dev}"
+      - "--spring.cloud.nacos.discovery.server-addr=${NACOS_ADDR:-rcl-nacos:8848}"
+      - "--spring.cloud.nacos.config.server-addr=${NACOS_ADDR:-rcl-nacos:8848}"
+      - "--spring.cloud.nacos.discovery.namespace=${NACOS_NAMESPACE:-}"
+      - "--spring.cloud.nacos.config.namespace=${NACOS_NAMESPACE:-}"
+      - "--spring.cloud.nacos.discovery.group=${NACOS_GROUP:-DEFAULT_GROUP}"
+      - "--spring.cloud.nacos.config.group=${NACOS_GROUP:-DEFAULT_GROUP}"
+      - "--spring.cloud.nacos.discovery.username=${NACOS_USERNAME:-}"
+      - "--spring.cloud.nacos.discovery.password=${NACOS_PASSWORD:-}"
+      - "--spring.cloud.nacos.config.username=${NACOS_USERNAME:-}"
+      - "--spring.cloud.nacos.config.password=${NACOS_PASSWORD:-}"
+      - "--file.path=/data/uploads"
+      - "--file.prefix=/statics"
+      - "--file.domain=http://${SERVER_IP:-192.168.106.199}:9300"
+    ports:
+      - "${SERVER_IP:-192.168.106.199}:9300:9300"
+    volumes:
+      - file-logs:/app/logs
+      - file-uploads:/data/uploads
+
+  monitor:
+    <<: *common
+    image: "ruoyi-learning/monitor:${MONITOR_VERSION:-initial}"
+    build:
+      context: ./build/monitor
+      args:
+        JAVA_IMAGE: "${JAVA_IMAGE:-eclipse-temurin:17-jre-jammy}"
+    mem_limit: 1g
+    environment:
+      <<: *environment
+    command: *command
+    ports:
+      - "${SERVER_IP:-192.168.106.199}:9100:9100"
+    volumes:
+      - monitor-logs:/app/logs
+
+networks:
+  infrastructure:
+    external: true
+    name: "${INFRA_NETWORK:-ruoyi-cloud-learning-local}"
+
+volumes:
+  gateway-logs:
+  auth-logs:
+  system-logs:
+  gen-logs:
+  job-logs:
+  file-logs:
+  monitor-logs:
+  file-uploads:
