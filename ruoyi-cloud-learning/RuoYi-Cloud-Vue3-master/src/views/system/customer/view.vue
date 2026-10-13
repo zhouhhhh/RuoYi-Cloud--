@@ -169,6 +169,8 @@
                     <template #default="scope">
                         <el-button link type="primary" icon="Edit" @click="handleContactUpdate(scope.row)"
                             v-hasPermi="['system:contact:edit']">修改</el-button>
+                        <el-button link type="danger" icon="Delete" @click="handleContactDelete(scope.row)"
+                            v-hasPermi="['system:contact:remove']">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -208,7 +210,7 @@
 
 <script setup name="CustomerViewDrawer">
 import { getCustomer } from '@/api/system/customer'
-import { listContact, addContact, getContact, updateContact } from '@/api/system/contact'
+import { listContact, addContact, getContact, updateContact, delContact } from '@/api/system/contact'
 import { reactive } from 'vue'
 
 const { proxy } = getCurrentInstance()
@@ -386,6 +388,24 @@ async function handleContactUpdate (row) {
     nextTick(() => {
         contactFormRef.value?.clearValidate()
     })
+}
+
+/** 删除联系人 */
+function handleContactDelete (row) {
+    const contactId = row.contactId
+    const contactName = row.contactName
+    proxy.$modal.confirm('是否确认删除联系人"' + contactName + '"？').then(function () {
+        return delContact(contactId)
+    }).then(() => {
+        if (
+            contactListByCustomerId.value.length === 1
+            && contactQueryParams.value.pageNum > 1
+        ) {
+            contactQueryParams.value.pageNum--
+        }
+        fetchContactListByCustomerId()
+        proxy.$modal.msgSuccess("删除成功")
+    }).catch(() => { })
 }
 
 defineExpose({ open })
