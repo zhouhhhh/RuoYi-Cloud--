@@ -2,6 +2,10 @@ package com.ruoyi.system.domain;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.core.annotation.Excel;
@@ -11,7 +15,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
  * CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。对象 crm_follow_record
  * 
  * @author ruoyi
- * @date 2026-10-15
+ * @date 2026-10-16
  */
 public class CrmFollowRecord extends BaseEntity
 {
@@ -37,13 +41,13 @@ public class CrmFollowRecord extends BaseEntity
     private String content;
 
     /** 实际跟进时间，精确到秒 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "实际跟进时间，精确到秒", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "实际跟进时间，精确到秒", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date followTime;
 
     /** 本次约定的下次跟进时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "本次约定的下次跟进时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "本次约定的下次跟进时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date nextFollowTime;
 
     /** 0 正常、2 删除 */
@@ -64,6 +68,7 @@ public class CrmFollowRecord extends BaseEntity
         this.customerId = customerId;
     }
 
+    @NotNull(message = "所属客户不能为空")
     public Long getCustomerId() 
     {
         return customerId;
@@ -84,6 +89,8 @@ public class CrmFollowRecord extends BaseEntity
         this.followType = followType;
     }
 
+    @NotBlank(message = "跟进方式不能为空")
+    @Pattern(regexp = "[0-3]", message = "跟进方式只能为0、1、2、3")
     public String getFollowType() 
     {
         return followType;
@@ -94,6 +101,8 @@ public class CrmFollowRecord extends BaseEntity
         this.content = content;
     }
 
+    @NotBlank(message = "跟进内容不能为空")
+    @Size(max = 2000, message = "跟进内容不能超过2000个字符")
     public String getContent() 
     {
         return content;
@@ -104,6 +113,7 @@ public class CrmFollowRecord extends BaseEntity
         this.followTime = followTime;
     }
 
+    @NotNull(message = "跟进时间不能为空")
     public Date getFollowTime() 
     {
         return followTime;

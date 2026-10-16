@@ -7,7 +7,7 @@ import com.ruoyi.system.domain.CrmFollowRecord;
  * CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。Service接口
  * 
  * @author ruoyi
- * @date 2026-10-15
+ * @date 2026-10-16
  */
 public interface ICrmFollowRecordService 
 {

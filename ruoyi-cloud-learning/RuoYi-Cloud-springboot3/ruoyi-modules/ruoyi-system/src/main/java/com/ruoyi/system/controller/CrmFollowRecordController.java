@@ -3,6 +3,7 @@ package com.ruoyi.system.controller;
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.security.annotation.RequiresPermissions;
+import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.domain.CrmFollowRecord;
 import com.ruoyi.system.service.ICrmFollowRecordService;
 import com.ruoyi.common.core.web.controller.BaseController;
@@ -25,7 +27,7 @@ import com.ruoyi.common.core.web.page.TableDataInfo;
  * CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。Controller
  * 
  * @author ruoyi
- * @date 2026-10-15
+ * @date 2026-10-16
  */
 @RestController
 @RequestMapping("/followRecord")
@@ -37,7 +39,7 @@ public class CrmFollowRecordController extends BaseController
     /**
      * 查询CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。列表
      */
-    @RequiresPermissions("system:record:list")
+    @RequiresPermissions("system:followRecord:list")
     @GetMapping("/list")
     public TableDataInfo list(CrmFollowRecord crmFollowRecord)
     {
@@ -49,7 +51,7 @@ public class CrmFollowRecordController extends BaseController
     /**
      * 导出CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。列表
      */
-    @RequiresPermissions("system:record:export")
+    @RequiresPermissions("system:followRecord:export")
     @Log(title = "CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, CrmFollowRecord crmFollowRecord)
@@ -62,7 +64,7 @@ public class CrmFollowRecordController extends BaseController
     /**
      * 获取CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。详细信息
      */
-    @RequiresPermissions("system:record:query")
+    @RequiresPermissions("system:followRecord:query")
     @GetMapping(value = "/{followId}")
     public AjaxResult getInfo(@PathVariable("followId") Long followId)
     {
@@ -72,18 +74,19 @@ public class CrmFollowRecordController extends BaseController
     /**
      * 新增CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。
      */
-    @RequiresPermissions("system:record:add")
+    @RequiresPermissions("system:followRecord:add")
     @Log(title = "CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody CrmFollowRecord crmFollowRecord)
+    public AjaxResult add(@Validated @RequestBody CrmFollowRecord crmFollowRecord)
     {
+        crmFollowRecord.setCreateBy(SecurityUtils.getUsername());
         return toAjax(crmFollowRecordService.insertCrmFollowRecord(crmFollowRecord));
     }
 
     /**
      * 修改CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。
      */
-    @RequiresPermissions("system:record:edit")
+    @RequiresPermissions("system:followRecord:edit")
     @Log(title = "CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody CrmFollowRecord crmFollowRecord)
@@ -94,7 +97,7 @@ public class CrmFollowRecordController extends BaseController
     /**
      * 删除CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。
      */
-    @RequiresPermissions("system:record:remove")
+    @RequiresPermissions("system:followRecord:remove")
     @Log(title = "CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{followIds}")
     public AjaxResult remove(@PathVariable Long[] followIds)

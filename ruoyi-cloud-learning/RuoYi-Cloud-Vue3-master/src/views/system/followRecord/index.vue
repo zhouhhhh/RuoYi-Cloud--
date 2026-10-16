@@ -46,7 +46,7 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['system:record:add']"
+          v-hasPermi="['system:followRecord:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -56,7 +56,7 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['system:record:edit']"
+          v-hasPermi="['system:followRecord:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -66,7 +66,7 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['system:record:remove']"
+          v-hasPermi="['system:followRecord:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -75,13 +75,13 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['system:record:export']"
+          v-hasPermi="['system:followRecord:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="recordList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="followRecordList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键，跟进记录 ID" align="center" prop="followId" />
       <el-table-column label="所属客户 ID，逻辑关联客户表" align="center" prop="customerId" />
@@ -100,8 +100,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:record:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['system:record:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:followRecord:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['system:followRecord:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -116,7 +116,7 @@
 
     <!-- 添加或修改CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="recordRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="followRecordRef" :model="form" :rules="rules" label-width="100px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="所属客户 ID，逻辑关联客户表" prop="customerId">
@@ -170,12 +170,12 @@
   </div>
 </template>
 
-<script setup name="Record">
-import { listRecord, getRecord, delRecord, addRecord, updateRecord } from "@/api/system/record"
+<script setup name="FollowRecord">
+import { listFollowRecord, getFollowRecord, delFollowRecord, addFollowRecord, updateFollowRecord } from "@/api/system/followRecord"
 
 const { proxy } = getCurrentInstance()
 
-const recordList = ref([])
+const followRecordList = ref([])
 const open = ref(false)
 const loading = ref(true)
 const showSearch = ref(true)
@@ -227,8 +227,8 @@ const { queryParams, form, rules } = toRefs(data)
 /** 查询CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。列表 */
 function getList() {
   loading.value = true
-  listRecord(queryParams.value).then(response => {
-    recordList.value = response.rows
+  listFollowRecord(queryParams.value).then(response => {
+    followRecordList.value = response.rows
     total.value = response.total
     loading.value = false
   })
@@ -256,7 +256,7 @@ function reset() {
     updateBy: null,
     updateTime: null
   }
-  proxy.resetForm("recordRef")
+  proxy.resetForm("followRecordRef")
 }
 
 /** 搜索按钮操作 */
@@ -289,7 +289,7 @@ function handleAdd() {
 function handleUpdate(row) {
   reset()
   const _followId = row.followId || ids.value
-  getRecord(_followId).then(response => {
+  getFollowRecord(_followId).then(response => {
     form.value = response.data
     open.value = true
     title.value = "修改CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。"
@@ -298,16 +298,16 @@ function handleUpdate(row) {
 
 /** 提交按钮 */
 function submitForm() {
-  proxy.$refs["recordRef"].validate(valid => {
+  proxy.$refs["followRecordRef"].validate(valid => {
     if (valid) {
       if (form.value.followId != null) {
-        updateRecord(form.value).then(() => {
+        updateFollowRecord(form.value).then(() => {
           proxy.$modal.msgSuccess("修改成功")
           open.value = false
           getList()
         })
       } else {
-        addRecord(form.value).then(() => {
+        addFollowRecord(form.value).then(() => {
           proxy.$modal.msgSuccess("新增成功")
           open.value = false
           getList()
@@ -321,7 +321,7 @@ function submitForm() {
 function handleDelete(row) {
   const _followIds = row.followId || ids.value
   proxy.$modal.confirm('是否确认删除CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。编号为"' + _followIds + '"的数据项？').then(function() {
-    return delRecord(_followIds)
+    return delFollowRecord(_followIds)
   }).then(() => {
     getList()
     proxy.$modal.msgSuccess("删除成功")
@@ -330,9 +330,9 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('system/record/export', {
+  proxy.download('system/followRecord/export', {
     ...queryParams.value
-  }, `record_${new Date().getTime()}.xlsx`)
+  }, `followRecord_${new Date().getTime()}.xlsx`)
 }
 
 getList()

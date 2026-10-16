@@ -1,7 +1,14 @@
 package com.ruoyi.system.service.impl;
 
+import java.util.Date;
 import java.util.List;
+
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
+import com.ruoyi.system.domain.CrmContact;
+import com.ruoyi.system.domain.CrmCustomer;
+import com.ruoyi.system.mapper.CrmContactMapper;
+import com.ruoyi.system.mapper.CrmCustomerMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.CrmFollowRecordMapper;
@@ -12,13 +19,17 @@ import com.ruoyi.system.service.ICrmFollowRecordService;
  * CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。Service业务层处理
  * 
  * @author ruoyi
- * @date 2026-10-15
+ * @date 2026-10-16
  */
 @Service
 public class CrmFollowRecordServiceImpl implements ICrmFollowRecordService 
 {
     @Autowired
     private CrmFollowRecordMapper crmFollowRecordMapper;
+    @Autowired
+    private CrmContactMapper crmContactMapper;
+    @Autowired
+    private CrmCustomerMapper crmCustomerMapper;
 
     /**
      * 查询CRM 客户跟进记录，记录客户的跟进情况，支持多种跟进方式。
@@ -53,7 +64,31 @@ public class CrmFollowRecordServiceImpl implements ICrmFollowRecordService
     @Override
     public int insertCrmFollowRecord(CrmFollowRecord crmFollowRecord)
     {
-        crmFollowRecord.setCreateTime(DateUtils.getNowDate());
+        Date nowDate = DateUtils.getNowDate();
+        Date followTime = crmFollowRecord.getFollowTime();
+        Date nextFollowTime = crmFollowRecord.getNextFollowTime();
+        if (followTime.after(nowDate)) {
+            throw new ServiceException("跟进时间晚于现在时间！拒绝添加跟进记录！");
+        }
+        if (nextFollowTime != null && !nextFollowTime.after(followTime)) {
+            throw new ServiceException("下次跟进时间非空，且不晚于跟进时间！拒绝添加跟进记录！");
+        }
+
+        CrmCustomer crmCustomer = crmCustomerMapper.selectCrmCustomerByCustomerId(crmFollowRecord.getCustomerId());
+        if (crmCustomer == null) {
+            throw new ServiceException("客户不存在或已删除，拒绝添加跟进记录！");
+        }
+        if (crmFollowRecord.getContactId() != null) {
+            CrmContact crmContact = crmContactMapper.selectCrmContactByContactId(crmFollowRecord.getContactId());
+            if (crmContact == null) {
+                throw new ServiceException("联系人不存在或已删除，拒绝添加跟进记录！");
+            }
+            if (!crmContact.getCustomerId().equals(crmFollowRecord.getCustomerId())) {
+                throw new ServiceException("联系人不属于当前客户，拒绝添加跟进记录！");
+            }
+        }
+
+        crmFollowRecord.setCreateTime(nowDate);
         return crmFollowRecordMapper.insertCrmFollowRecord(crmFollowRecord);
     }
 
